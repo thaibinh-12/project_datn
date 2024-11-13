@@ -1,62 +1,44 @@
 package com.fpoly.java6.model.dto;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
-import com.fpoly.java6.entities.Brand;
-import com.fpoly.java6.entities.Favorite;
-import com.fpoly.java6.entities.Product;
-import com.fpoly.java6.entities.Type;
-import com.fpoly.java6.entities.Variant;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductDto {
-	@Column(name = "id")
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
-	
-	
-	@ManyToOne
-	@JoinColumn(name = "type_id")
-	private Type type;	
-	
-	@ManyToOne
-	@JoinColumn(name = "brand_id")
-	private Brand brand;
-	
-	
-	@Column(name = "name",columnDefinition = "nvarchar(255)")
-	private String name;
-	@Column(name = "description", length = 1000,columnDefinition = "nvarchar(max)")
-	private String description;
-	@Column(name = "date")
-	private Date date;
-	@Column(name = "image")
-	private String image;
-	@Column(name = "status")
-	private int status;
-	
-	@OneToMany(mappedBy = "product")
-	private List<Variant> variants = new ArrayList<>();
-	
-	@OneToMany(mappedBy = "product")
-	private List<Favorite> favorites = new ArrayList<>();
+
+    @JsonProperty("id")
+    private int id;
+
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("description")
+    private String description;
+
+    @JsonProperty("date")
+    private Date date;
+
+    @JsonProperty("image")
+    private String image;
+
+    @JsonProperty("status")
+    private int status;
+
+    @JsonProperty("variants")
+    @JsonManagedReference
+    private List<VariantDto> variants;  // Danh sách các variant của sản phẩm
+
+    @JsonProperty("brand")
+    private String brandName;  // Tên brand, thay vì đối tượng Brand
+
+    @JsonProperty("type")
+    private String typeName;  // Tên type, thay vì đối tượng Type
 }

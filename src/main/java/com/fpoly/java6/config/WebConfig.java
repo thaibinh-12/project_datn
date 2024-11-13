@@ -3,6 +3,7 @@ package com.fpoly.java6.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -19,6 +20,17 @@ public class WebConfig implements WebMvcConfigurer {
 		registry.addResourceHandler("/uploads/images/**")
          .addResourceLocations("");
 	}
+	
+	@Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+            .allowedOrigins("http://127.0.0.1:5501") 
+            .allowedMethods("GET", "POST", "PUT", "DELETE") 
+            .allowedHeaders("*")
+            .allowCredentials(true);
+        registry.addMapping("/**").allowedOrigins("http://localhost:3000"); 
+    }
+		
 
 	@Bean
 	public RestTemplate restTemplate() {

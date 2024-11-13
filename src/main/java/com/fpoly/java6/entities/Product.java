@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,10 +37,12 @@ public class Product {
 	
 	@ManyToOne
 	@JoinColumn(name = "type_id")
+	@JsonBackReference
 	private Type type;	
 	
 	@ManyToOne
 	@JoinColumn(name = "brand_id")
+	@JsonBackReference
 	private Brand brand;
 	
 	
@@ -53,8 +58,10 @@ public class Product {
 	private int status;
 	
 	@OneToMany(mappedBy = "product")
+	@JsonManagedReference
 	private List<Variant> variants = new ArrayList<>();;
 	
 	@OneToMany(mappedBy = "product")
+	@JsonManagedReference
 	private List<Favorite> favorites = new ArrayList<>();
 }

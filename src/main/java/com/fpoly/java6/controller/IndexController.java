@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,10 +25,11 @@ import com.fpoly.java6.jpa.BrandJPA;
 import com.fpoly.java6.jpa.ProductJPA;
 import com.fpoly.java6.jpa.TypeJPA;
 import com.fpoly.java6.model.dto.ProductDto;
-import com.fpoly.java6.service.ProductsService;
+import com.fpoly.java6.service.ProductService;
 
 @RestController
-@RequestMapping("/index")
+@RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:8081")
 public class IndexController {
 
 	@Autowired
@@ -35,48 +37,42 @@ public class IndexController {
 
 	@Autowired
 	BrandJPA brandJPA;
-	
-	@Autowired
-	ProductsService productsService;
 
+
+
+	@Autowired
+	private ProductService productService;
+
+	@GetMapping("/index")
+	@ResponseBody
+	public List<Product> gettAllProducts() {
+		
+		return productService.findAllProducts();
+		
+	}
+}
 //	@RequestMapping("/index")
 //	public String getIndex(Model model) {
 //		List<Brand> brands = brandJPA.findAll();
-//		
+//
 //		Map<String, List<Product>> brandProductMap = new HashMap<>();
 //		Map<String, Integer> productCountMap = new HashMap<>();
+//
 //		for (Brand brand : brands) {
 //			List<Product> products = productJPA.findByBrand(brand);
+//
+//			// Chỉ lấy tối đa 4 sản phẩm cho mỗi Brand
 //			brandProductMap.put(brand.getName(), products.size() > 4 ? products.subList(0, 4) : products);
+//
+//			// Đếm số lượng sản phẩm cho mỗi Brand
 //			productCountMap.put(brand.getName(), products.size());
+//
 //		}
-//			model.addAttribute("brands", brands);
-//			model.addAttribute("brandProductMap", brandProductMap);
+//		model.addAttribute("brands", brands);
+//		model.addAttribute("brandProductMap", brandProductMap);
 //		model.addAttribute("productCountMap", productCountMap);
+//
 //		return "user/index";
+//
 //	}
-	
-	 @GetMapping("")
-	    public ResponseEntity<?> getListProduct() {
-	        List<ProductDto> products = productsService.getListProducts();
-	        return ResponseEntity.ok(products);
-	    }
-
-	    // Lấy thông tin sản phẩm theo ID
-	    @GetMapping("/{id}")
-	    public ResponseEntity<?> getProductById(@PathVariable int id) {
-	        ProductDto reDto = productsService.getProductById(id);
-	        if (reDto == null) {
-	            return ResponseEntity.notFound().build();  // Trả về mã lỗi 404 nếu không tìm thấy sản phẩm
-	        }
-	        return ResponseEntity.ok(reDto);
-	    }
-
-	    // Tìm kiếm sản phẩm theo tên
-	    @GetMapping("/search")
-	    public ResponseEntity<?> searchProduct(@RequestParam(name = "keyword", required = false, defaultValue = "") String name) {
-	        List<ProductDto> product = productsService.searchProduct(name);
-	        return ResponseEntity.ok(product);
-	    }
-
-}
+//}

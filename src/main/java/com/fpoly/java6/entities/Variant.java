@@ -3,6 +3,9 @@ package com.fpoly.java6.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,14 +32,17 @@ public class Variant {
 	
 	@ManyToOne
 	@JoinColumn(name = "size_id")
+	
 	private Size size;
 	
 	@ManyToOne
 	@JoinColumn(name = "color_id")
+	
 	private Color color;
 	
 	@ManyToOne
 	@JoinColumn(name = "product_id")
+
 	private Product product;
 	
 	@Column(name = "price")
@@ -45,5 +51,6 @@ public class Variant {
 	private int quantity;
 	
 	@OneToMany(mappedBy = "variant")
+
 	private List<Order_Detail> order_Details = new ArrayList<>();
 }
