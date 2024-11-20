@@ -1,6 +1,7 @@
 package com.fpoly.java6.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fpoly.java6.entities.Color;
 import com.fpoly.java6.entities.Size;
 
 import lombok.AllArgsConstructor;

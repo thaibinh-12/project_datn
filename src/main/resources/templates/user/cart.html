@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
         integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" type="text/css" th:href="@{/css/cart.css}">
+    <link rel="stylesheet" type="text/css" href="/src/main/resources/static/css/cart.css">
     <title>Cart</title>
 </head>
 
@@ -95,13 +95,12 @@
             </div>
         </nav>
     </header>
-
     <div class="container mb-5">
         <h4 class="fw-bold" style="color: #76ABAE;">Giỏ hàng</h4>
         <p class="text-muted">Sản phẩm bạn đã chọn</p>
         <div class="d-flex">
             <a href="" class="btn btn-dark me-3">Mua tất cả sản phẩm</a>
-            <h6 class="ms-3 mt-3">Tổng tiền <span>2.850.000₫</span></h6>
+            <h6 class="ms-3 mt-3">Tổng tiền: <span id="cartTotal">0₫</span></h6>
         </div>
 
         <hr>
@@ -109,36 +108,210 @@
             <thead>
                 <tr>
                     <th>Tên sản phẩm</th>
-                    <th>Hình ảnh</th>
                     <th>Kích cỡ</th>
+                    <th>Hình ảnh</th>
                     <th>Màu sắc</th>
                     <th>Số lượng</th>
                     <th>Thành tiền</th>
                     <th></th>
+                    <th></th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>Nike AF1 Low 'Triple White</td>
-                    <td><img src="https://bizweb.dktcdn.net/thumb/1024x1024/100/413/335/products/duyetfashion-nike-air-force-1-07-white-315122-111-315115-112-duyet-fashion-1-jpeg.jpg?v=1634568391747"
-                            style="width: 100px; height: 100px" /></td>
-                    <td>38</td>
-                    <td>Trắng</td>
-
-                    <td>
-                        <input type="number" min="1" max="10" step="1" value="1"
-                            style="width: 50px; text-align: center;">
-                    </td>
-                    <td>2.850.000₫</td>
-                    <td>
-                        <button type="button" class="btn btn-dark">Hủy</button>
-                        <a href="" class="btn btn-dark me-2">Mua ngay</a>
-                    </td>
-                </tr>
-
+            <tbody id="cartItems">
+                <div id="cart-container">
+                    <!-- Danh sách các sản phẩm sẽ được hiển thị ở đây -->
+                </div>
             </tbody>
         </table>
     </div>
+    <script>
+        function setCookie(name, value, days) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000)); // Set expiry time for cookie
+            document.cookie = `${name}=${encodeURIComponent(JSON.stringify(value))}; expires=${expires.toUTCString()}; path=/`;
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return JSON.parse(decodeURIComponent(parts.pop().split(';').shift()));
+            return null;
+        }
+
+        // Fetch accountId from cookie
+        const accountId = getCookie('user') ? getCookie('user').id : null;
+        console.log(accountId);
+
+        // Fetch cart items from the API
+        fetch(`http://localhost:8080/api/cart/items?accountId=${accountId}`)
+            .then(response => response.json())
+            .then(cartItems => {
+                const cartItemsContainer = document.getElementById('cartItems');
+                cartItemsContainer.innerHTML = '';
+
+                cartItems.forEach(item => {
+                    const product = item.product;
+                    const variant = item.variant;
+                    const cartItemHtml = `
+    <tr data-id="${item.id}">
+        <td>${product.name}</td>
+        <td>${variant.size}</td>
+        <td><img src="${product.image}" alt="${product.name}" class="cart-item-image" width="100" height="100"></td>
+        <td>${variant.color}</td>
+        <td>
+            <input type="number" value="${item.quantity}" data-id="${item.id}" min="1" class="quantity-input"
+                onchange="updateCartItemQuantity(${item.id}, this.value)">
+        </td>
+        <td class="item-total">${variant.price * item.quantity}₫</td>
+        <td><button class="btn btn-dark" onclick="removeItem(${item.id})">Xóa</button></td>
+        <td><button class="btn btn-dark" onclick="buyNow(${item.id})">Mua Ngay</button></td>
+    </tr>
+    `;
+                    cartItemsContainer.insertAdjacentHTML('beforeend', cartItemHtml);
+                });
+
+                updateCartTotal(cartItems);
+            })
+            .catch(error => {
+                console.error('Error fetching cart items:', error);
+            });
+
+        // Update cart item quantity in the backend
+        function updateCartItemQuantity(itemId, newQuantity) {
+            if (newQuantity <= 0) { alert('Số lượng phải lớn hơn 0'); return; }
+            fetch(`http://localhost:8080/api/cart/update/${itemId}?quantity=${newQuantity}`, { method: 'PUT' })
+                .then(response => {
+                    if (response.headers.get('Content-Type').includes('application/json')) {
+                        return response.json();
+                    } else {
+                        return response.text();  // Return raw text if not JSON
+                    }
+                })
+                .then(data => {
+                    if (typeof data === 'string') {
+                        alert(data);  // If response is text, show it
+                    } else {
+                        if (data.success) {
+                            alert('Số lượng đã được cập nhật.');
+                            updateCartItemInUI(itemId, newQuantity);
+                        } else {
+                            alert(data.message || 'Error updating cart item.');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating cart item:', error);
+                    alert('Có lỗi xảy ra khi cập nhật giỏ hàng.');
+                });
+
+        }
+
+        // Update the cart item UI after quantity is updated
+        function updateCartItemInUI(itemId, newQuantity) {
+            const cartItemRow = document.querySelector(`tr[data-id="${itemId}"]`);
+            const quantityInput = cartItemRow.querySelector('.quantity-input');
+            const priceCell = cartItemRow.querySelector('.item-total');
+
+            quantityInput.value = newQuantity;
+            const price = parseFloat(priceCell.textContent) / (newQuantity - 1); // Get price per item
+            priceCell.textContent = `${price * newQuantity}₫`;
+
+            updateCartTotal();
+        }
+
+        // Update the total price of the cart
+        function updateCartTotal(cartItems) {
+            let total = 0;
+            cartItems.forEach(item => {
+                total += item.variant.price * item.quantity;
+            });
+            document.getElementById('cartTotal').innerText = `${total}₫`;
+        }
+
+        function removeItem(itemId) {
+            fetch(`http://localhost:8080/api/cart/remove/${itemId}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);  // Hiển thị thông báo thành công
+                        updateCartUI();  // Cập nhật lại giỏ hàng
+                    } else {
+                        alert("Lỗi khi xóa sản phẩm: " + data.message);  // Hiển thị thông báo lỗi
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi gọi API:', error);
+                    alert('Có lỗi xảy ra khi xóa sản phẩm.');
+                });
+        }
+
+
+
+
+        function updateCartUI() {
+            // Lấy lại accountId từ cookie
+            const accountId = getCookie('user') ? getCookie('user').id : null;
+
+            if (!accountId) {
+                alert('Không tìm thấy tài khoản.');
+                return;
+            }
+
+            // Gọi lại API lấy giỏ hàng hiện tại
+            fetch(`http://localhost:8080/api/cart/items?accountId=${accountId}`)
+                .then(response => response.json())
+                .then(cartItems => {
+                    const cartItemsContainer = document.getElementById('cartItems');
+                    cartItemsContainer.innerHTML = '';  // Xóa danh sách giỏ hàng hiện tại
+
+                    // Nếu không có sản phẩm trong giỏ
+                    if (cartItems.length === 0) {
+                        cartItemsContainer.innerHTML = '<tr><td colspan="8" class="text-center">Giỏ hàng của bạn đang trống.</td></tr>';
+                        document.getElementById('cartTotal').innerText = '0₫';  // Cập nhật tổng tiền
+                        return;
+                    }
+
+                    // Lặp qua các sản phẩm trong giỏ hàng và hiển thị lại
+                    cartItems.forEach(item => {
+                        const product = item.product;
+                        const variant = item.variant;
+                        const cartItemHtml = `
+                    <tr data-id="${item.id}">
+                        <td>${product.name}</td>
+                        <td>${variant.size}</td>
+                        <td><img src="${product.image}" alt="${product.name}" class="cart-item-image" width="100" height="100"></td>
+                        <td>${variant.color}</td>
+                        <td>
+                            <input type="number" value="${item.quantity}" data-id="${item.id}" min="1" class="quantity-input"
+                                onchange="updateCartItemQuantity(${item.id}, this.value)">
+                        </td>
+                        <td class="item-total">${variant.price * item.quantity}₫</td>
+                        <td><button class="btn btn-dark" onclick="removeItem(${item.id})">Xóa</button></td>
+                        <td><button class="btn btn-dark" onclick="buyNow(${item.id})">Mua Ngay</button></td>
+                    </tr>
+                `;
+                        cartItemsContainer.insertAdjacentHTML('beforeend', cartItemHtml);
+                    });
+
+                    // Cập nhật tổng tiền của giỏ hàng
+                    updateCartTotal(cartItems);
+                })
+                .catch(error => {
+                    console.error('Lỗi khi tải lại giỏ hàng:', error);
+                    alert('Có lỗi xảy ra khi làm mới giỏ hàng.');
+                });
+        }
+
+
+        // Handle "Buy Now" action
+        function buyNow(productId) {
+            alert(`Mua ngay sản phẩm ID: ${productId}`);
+            // You can redirect to the checkout page here
+        }
+
+        // Remove item from cart
+
+    </script>
 
 </body>
 

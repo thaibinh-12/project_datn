@@ -3,12 +3,14 @@ package com.fpoly.java6.model.mapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
 import com.fpoly.java6.entities.Product;
-import com.fpoly.java6.entities.Variant;
 import com.fpoly.java6.model.dto.BrandDto;
 import com.fpoly.java6.model.dto.ProductDto;
 import com.fpoly.java6.model.dto.VariantDto;
 
+@Component
 public class ProductMapper {
 
 	public static ProductDto tProductDto(Product product) {

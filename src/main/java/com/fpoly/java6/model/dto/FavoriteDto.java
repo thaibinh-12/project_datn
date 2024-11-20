@@ -18,16 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FavoriteDto {
-	@Column(name = "id")
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
-	
-	@ManyToOne
-	@JoinColumn(name = "account_id")
 	private Account account;
-	
-	@ManyToOne
-	@JoinColumn(name = "product_id")
 	private Product product;
 }

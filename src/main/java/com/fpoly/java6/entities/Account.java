@@ -61,4 +61,9 @@ public class Account {
     
     @OneToMany(mappedBy = "account")
 	private List<Cart_Detail> cart_Details = new ArrayList<>();
+
+	public Account orElse(Object object) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

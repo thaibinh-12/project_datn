@@ -1,6 +1,5 @@
 package com.fpoly.java6.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,7 +32,7 @@ public class ProductDto {
     private int status;
 
     @JsonProperty("variants")
-    @JsonManagedReference
+   // @JsonManagedReference
     private List<VariantDto> variants;  // Danh sách các variant của sản phẩm
 
     @JsonProperty("brand")

@@ -29,7 +29,7 @@ import com.fpoly.java6.service.ProductService;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "http://localhost:8080")
 public class IndexController {
 
 	@Autowired

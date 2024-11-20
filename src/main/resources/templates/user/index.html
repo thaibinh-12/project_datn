@@ -18,7 +18,7 @@
 		<nav class="navbar navbar-expand-lg navbar-light" style="background-color: #243642;">
 			<div class="container">
 				<!-- Logo và tên thương hiệu -->
-				<a class="navbar-brand d-flex align-items-center" href="index"> <i
+				<a class="navbar-brand d-flex align-items-center" href="index.html"> <i
 						class="fa-brands fa-strava fa-2x me-2 text-light"></i> <span class="fw-bold text-light">Conan
 						Store</span>
 				</a>
@@ -32,11 +32,11 @@
 				<div class="collapse navbar-collapse" id="navbarContent">
 					<!-- Menu chính -->
 					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-						<li class="nav-item"><a class="nav-link active text-light" href="/conan/index">Trang chủ</a>
+						<li class="nav-item"><a class="nav-link active text-light" href="index.html">Trang chủ</a>
 						</li>
-						<li class="nav-item"><a class="nav-link text-light" href="/conan/about">Về chúng tôi</a></li>
-						<li class="nav-item"><a class="nav-link text-light" href="/conan/product">Sản phẩm</a></li>
-						<li class="nav-item"><a class="nav-link text-light" href="/conan/contact">Liên hệ</a></li>
+						<li class="nav-item"><a class="nav-link text-light" href="about.html">Về chúng tôi</a></li>
+						<li class="nav-item"><a class="nav-link text-light" href="product.html">Sản phẩm</a></li>
+						<li class="nav-item"><a class="nav-link text-light" href="contact.html">Liên hệ</a></li>
 					</ul>
 
 					<!-- search -->
@@ -82,13 +82,15 @@
 
 					<!-- Giỏ hàng và tài khoản người dùng -->
 					<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-						<li class="nav-item"><a class="nav-link text-light" href="/conan/cart"> <i
+						<li class="nav-item"><a class="nav-link text-light" href="cart.html"> <i
 									class="fa-solid fa-cart-shopping me-2"></i>
 							</a></li>
-						<li class="nav-item"><a class="nav-link text-light" href="/conan/profile"> <i
+						<li class="nav-item"><a class="nav-link text-light" href="profile.html"> <i
 									class="fa-solid fa-user me-2"></i>
+								<div id="userInfo"></div>
+
 							</a></li>
-						<li class="nav-item"><a class="nav-link text-light" href="/conan/login"> <i
+						<li class="nav-item"><a class="nav-link text-light" id="logoutBtn" href="login.html"> <i
 									class="fa-solid fa-right-from-bracket me-2"></i></a></li>
 
 					</ul>
@@ -126,30 +128,6 @@
 			</button>
 		</div>
 
-		<section class="featured-products container my-5">
-			<h3 class="text-center mb-4" style="color: #31363F;">Sản phẩm
-				nổi bật</h3>
-			<div class="row">
-				<div class="d-flex justify-content-center">
-					<div class="product-card text-center position-relative mx-2">
-						<img src="" class="product-img mx-auto mt-2" alt="Product Image" loading="lazy">
-
-						<div class="product-info">
-							<h6 class="product-category" style="color: #76ABAE;"></h6>
-							<h6 class="product-name text-dark">Samba OG</h6>
-							<h5 class="product-price text-dark fw-bold ms-2">1,200,000₫</h5>
-
-							<!-- Nội dung hover -->
-							<div class="hover-content">
-								<button class="btn btn-outline-dark mb-2">Xem chi tiết</button>
-								<button class="btn btn-outline-dark">Thêm vào yêu thích</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-		</section>
 
 		<div class="container mb-5">
 			<!-- discount -->
@@ -173,8 +151,11 @@
 				<h4 class="text-center mb-4">Thương Hiệu</h4>
 
 				<!-- Các sản phẩm -->
-				<div class="row" id="product-list-container">
+				<div class="row item" id="product-list-container">
 					<!-- Các thẻ sản phẩm sẽ được chèn vào đây -->
+				</div>
+				<div id="search-results" class="search-results">
+
 				</div>
 			</div>
 
@@ -267,85 +248,186 @@
 		</script>
 
 	<script>
-		fetch('http://localhost:8081/api/products	')
-			.then(res => res.json())
-			.then(products => {
-				const productContainer = document.getElementById('product-list-container');
-				productContainer.innerHTML = '';
+		function getCookie(name) {
+			const value = `; ${document.cookie}`;
+			const parts = value.split(`; ${name}=`);
+			if (parts.length === 2) return JSON.parse(decodeURIComponent(parts.pop().split(';').shift()));
+			return null;
+		}
 
-				let currentBrand = null;
-				let brandProducts = [];
+		// Example usage
+		const userCookie = getCookie('user');
+		if (userCookie) {
+			console.log("UserName: " + userCookie.userName); // Get the user name
+			console.log("Role: " + userCookie.role); // Get the user role
+			console.log("Address: " + userCookie.addresses); // Get user addresses
+			console.log("Phone: " + userCookie.phone); // Get user addresses
+			console.log("Email: " + userCookie.email); // Get user addresses
+			console.log("ID: " + userCookie.id); // Get user addresses
+			console.log("Image: " + userCookie.userImage); // Get user addresses
+		}
 
-				products.forEach(product => {
-					if (product.brand.name !== currentBrand) {
-						if (currentBrand !== null) {
-							renderBrand(currentBrand, brandProducts);
-						}
-						currentBrand = product.brand.name;
-						brandProducts = [];
-					}
-					brandProducts.push(product);
-				});
 
-				if (currentBrand !== null) {
-					renderBrand(currentBrand, brandProducts);
-				}
 
-				function renderBrand(brandName, products) {
-					const brandSection = document.createElement('div');
-					const brandHeading = document.createElement('h6');
-					brandHeading.textContent = brandName;
-					brandHeading.classList.add('text-center', 'my-3');
-					brandSection.appendChild(brandHeading);
+		// Lấy các phần tử cần thiết
+		const searchInput = document.querySelector('.searchbar-input');
+		const searchResultsContainer = document.getElementById('search-results');
+		const productContainer = document.getElementById('product-list-container');
 
-					const productRow = document.createElement('div');
-					productRow.classList.add('row');
-					brandSection.appendChild(productRow);
+		// Hàm hiển thị tất cả sản phẩm từ API khi không có tìm kiếm
+		function loadAllProducts() {
+			fetch('http://localhost:8080/api/brands')
+				.then(res => res.json())
+				.then(brandsWithProducts => {
+					console.log("All products from API:", brandsWithProducts);
+					productContainer.innerHTML = '';
 
-					// Hiển thị 4 sản phẩm đầu tiên
-					products.slice(0, 4).forEach(product => {
-						productRow.insertAdjacentHTML('beforeend', getProductHtml(product));
+					brandsWithProducts.forEach(brand => {
+						const brandName = brand.brandName;
+						const products = brand.productDtos;
+						if (!Array.isArray(products) || products.length === 0) return;
+
+						renderBrand(brandName, products);
 					});
 
-					// Nếu còn sản phẩm, thêm nút "Xem thêm"
-					if (products.length > 4) {
-						const showMoreBtn = document.createElement('button');
-						showMoreBtn.classList.add('btn', 'btn-outline-secondary', 'my-2');
-						showMoreBtn.textContent = 'Xem thêm';
-						showMoreBtn.addEventListener('click', () => {
-							products.slice(4).forEach(product => {
-								productRow.insertAdjacentHTML('beforeend', getProductHtml(product));
-							});
-							showMoreBtn.remove();
+				})
+				.catch(error => console.error('Error fetching product data:', error));
+		}
+
+		// Hàm gọi API tìm kiếm
+		function searchProducts(keyword) {
+			fetch(`http://localhost:8080/api/search?keyword=${keyword}`)
+				.then(response => response.json())
+				.then(products => {
+					searchResultsContainer.innerHTML = '';
+					if (products.length === 0) {
+						searchResultsContainer.innerHTML = '<p class="text-center">Không tìm thấy sản phẩm nào.</p>';
+					} else {
+						const productGrid = document.createElement('div');
+						productGrid.classList.add('row', 'g-4'); // Sử dụng lớp row và khoảng cách giữa các cột
+
+						products.forEach((product, index) => {
+							// Tạo một cột cho mỗi sản phẩm
+							const productCol = document.createElement('div');
+							productCol.classList.add('col-md-3', 'mb-4'); // 4 sản phẩm trên mỗi hàng (col-md-3)
+
+							// Chèn HTML của sản phẩm vào cột
+							productCol.innerHTML = getProductHtml(product);
+							productGrid.appendChild(productCol);
 						});
-						brandSection.appendChild(showMoreBtn);
+						searchResultsContainer.appendChild(productGrid);
 					}
+				})
+				.catch(error => console.error('Error fetching search results:', error));
+		}
 
-					productContainer.appendChild(brandSection);
-				}
+		// Hàm hiển thị các sản phẩm theo từng thương hiệu
+		function renderBrand(brandName, products) {
+			const brandSection = document.createElement('div');
+			const brandHeading = document.createElement('h6');
+			brandHeading.textContent = brandName;
+			brandHeading.classList.add('text-center', 'my-3');
+			brandSection.appendChild(brandHeading);
 
-				function getProductHtml(product) {
-					return `
-                    <div class="col-md-3 mb-4">
-                        <div class="product-card text-center position-relative">
-                            <img src="${product.image}" class="product-img" alt="Product Image" loading="lazy">
-                            <div class="product-info">
-                                <h6 class="product-name">${product.name}</h6>
-                                <p class="brand-name">${product.brand.name}</p> <!-- Tên thương hiệu -->
-                                <div class="hover-content">
-                                    <a href="product_detail.html?id=${product.id}" class="btn btn-outline-dark mb-2">Xem chi tiết</a>
-                                    <a class="btn btn-outline-dark">Thêm vào yêu thích</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-				}
-			})
-			.catch(error => {
-				console.error('Error fetching product data:', error);
+			// Thêm d-flex vào phần tử cha để sắp xếp theo hàng ngang
+			const productRow = document.createElement('div');
+			productRow.classList.add('d-flex', 'flex-wrap', 'gap-3');  // Thêm flex-wrap và gap để sản phẩm không bị chồng lên nhau
+			brandSection.appendChild(productRow);
+
+			products.slice(0, 4).forEach(product => {
+				const productHtml = getProductHtml(product);
+				productRow.insertAdjacentHTML('beforeend', productHtml);
 			});
+
+			if (products.length > 4) {
+				const showMoreBtn = document.createElement('button');
+				showMoreBtn.classList.add('btn', 'btn-outline-secondary', 'my-2');
+				showMoreBtn.textContent = 'Xem thêm';
+				showMoreBtn.addEventListener('click', () => {
+					products.slice(4).forEach(product => {
+						const productHtml = getProductHtml(product);
+						productRow.insertAdjacentHTML('beforeend', productHtml);
+					});
+					showMoreBtn.remove();
+				});
+				brandSection.appendChild(showMoreBtn);
+			}
+
+			productContainer.appendChild(brandSection);
+
+
+		}
+
+
+
+		// Hàm tạo HTML cho sản phẩm
+		function getProductHtml(product) {
+			return `
+				<div class="d-flex" style="flex-wrap: wrap; gap: 15px;">
+					<div class="product-card text-center position-relative" style="width: 300px;">
+						<img src="${product.image}" class="product-img" alt="Product Image" loading="lazy">
+						<div class="product-info">
+							<h6 class="product-name">${product.name}</h6>
+							<div class="hover-content">
+								<a href="product_detail.html?id=${product.id}" class="btn btn-outline-dark mb-2">Xem chi tiết</a>
+								<!-- Nút yêu thích, sử dụng đúng product.id -->
+								<button class="btn btn-outline-dark btn-add-to-favorite" data-product-id="${product.id}" onclick="addToFavorites(${product.id})">Thêm vào yêu thích</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				`;
+		}
+
+
+		// Lắng nghe sự kiện nhập trên ô tìm kiếm
+		searchInput.addEventListener('keyup', function () {
+			const keyword = searchInput.value.trim();
+
+			if (keyword) {
+				productContainer.style.display = 'none'; // Ẩn tất cả sản phẩm
+				searchResultsContainer.style.display = 'block'; // Hiển thị vùng kết quả tìm kiếm
+				searchProducts(keyword); // Gọi API tìm kiếm
+			} else {
+				searchResultsContainer.innerHTML = ''; // Xóa kết quả tìm kiếm
+				productContainer.style.display = 'block'; // Hiển thị lại tất cả sản phẩm
+				loadAllProducts(); // Gọi lại API để tải toàn bộ sản phẩm
+			}
+		});
+
+		// Tải tất cả sản phẩm khi trang load lần đầu
+		loadAllProducts();
+
+
+
+
+		// Hàm gọi API để thêm sản phẩm vào yêu thích
+		function addToFavorites(productId) {
+			const userCookie = getCookie('user');  // Giả sử cookie lưu thông tin người dùng
+
+			if (userCookie && userCookie.id) {  // Kiểm tra nếu có accountId trong cookie
+				const accountId = userCookie.id;  // Lấy accountId từ cookie
+
+				// Gửi yêu cầu đến backend để thêm sản phẩm vào yêu thích
+				fetch(`http://localhost:8080/api/favorites/add?accountId=${accountId}&productId=${productId}`, {
+					method: 'POST',
+				})
+					.then(response => response.json())
+					.then(data => {
+						alert("Sản phẩm đã được thêm vào yêu thích.");
+						console.log(data);  // Bạn có thể hiển thị thêm thông tin nếu cần
+					})
+					.catch(error => {
+						alert("Lỗi kết nối với server: " + error.message);
+					});
+			} else {
+				alert("Vui lòng đăng nhập trước khi thêm sản phẩm vào yêu thích.");
+			}
+		}
 	</script>
+
+
+
 </body>
 
 </html>

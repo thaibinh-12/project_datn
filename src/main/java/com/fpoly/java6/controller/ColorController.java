@@ -14,6 +14,9 @@ import com.fpoly.java6.entities.Color;
 import com.fpoly.java6.entities.Variant;
 import com.fpoly.java6.jpa.ColorJPA;
 import com.fpoly.java6.jpa.VariantJPA;
+import com.fpoly.java6.model.dto.ColorDto;
+import com.fpoly.java6.model.dto.SizeDto;
+import com.fpoly.java6.service.ColorService;
 
 @RestController
 @RequestMapping("/api")
@@ -21,14 +24,11 @@ import com.fpoly.java6.jpa.VariantJPA;
 public class ColorController {
 	@Autowired
 	ColorJPA colorJPA;
+	@Autowired
+	ColorService colorService;
 
-//	@GetMapping("/colors")
-//	public List<Color> getAllColor() {
-//		return colorJPA.findAll(); 
-//	}
-//	
-//	@GetMapping("/colors/{id}")
-//    public Optional<Color> getColorById(@PathVariable int id) {
-//        return colorJPA.findById(id); // Trả về Variant với id tương ứng
-//    }
+	@GetMapping("/colors")
+    public List<ColorDto> getAllColors() {
+        return colorService.getAllColor();  // Lấy tất cả các kích cỡ dưới dạng SizeDto
+    }
 }
